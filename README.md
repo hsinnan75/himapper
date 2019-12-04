@@ -31,7 +31,7 @@ To index a reference genome, Himapper requires the target genome file (in fasta 
   ```
   $ bin/himapper index ref_file[ex.ecoli.fa] index_prefix[ex. Ecoli]
   ```
-The above command is to index the genome file Ecoli.fa and store the index files begining with ecoli.
+The above command is to index the reference (Ecoli.fa) with prefix of Ecoli.
 
 To analyze Hi-C data, Himapper requires the the index files of the reference genome and read files of paired-end reads. Users should use -i to specify the prefix of the index files (including the directory path).
 
