@@ -1,4 +1,4 @@
-Himapper: an Hi-C data analysis tool
+Himapper: a Hi-C data analysis tool
 ===================
 
 # Introduction
