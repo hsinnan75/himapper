@@ -17,11 +17,13 @@ void ShowProgramUsage(const char* program)
 {
 	fprintf(stdout, "HiMapper v%s (Hsin-Nan Lin & Wen-Lian Hsu)\n\n", VersionStr);
 	fprintf(stdout, "Usage: %s -i Index_Prefix -f <ReadFile_A1 ReadFile_B1 ...> [-f2 <ReadFile_A2 ReadFile_B2 ...>] -o Output\n\n", program);
-	fprintf(stdout, "Options: -t INT        number of threads [4]\n");
+	fprintf(stderr, "Options: -i STR        BWT_Index_Prefix\n");
+	fprintf(stderr, "         -r STR        Reference filename (format:fa)\n");
 	fprintf(stdout, "         -f            files with #1 mates reads (format:fa, fq, fq.gz)\n");
 	fprintf(stdout, "         -f2           files with #2 mates reads (format:fa, fq, fq.gz)\n");
 	fprintf(stdout, "         -o            read alignment filename in txt format [alignment.txt]\n");
 	fprintf(stdout, "         -m            output multiple alignments\n");
+	fprintf(stdout, "         -t INT        number of threads [4]\n");
 	fprintf(stdout, "         -g INT        max gaps (indels) [5]\n");
 	fprintf(stdout, "         -e STR        restriction enzyme (mboi, dpnii, bglii, hindiii)\n");
 	fprintf(stdout, "         -v            version\n");
