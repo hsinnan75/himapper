@@ -18,7 +18,7 @@ to download the package of Himapper.
 
 To compile Himapper, it requires libboost-all-dev, libbz2-dev, and liblzma-dev installed in your system.
 
-Please download juicer_tools.jar (https://github.com/aidenlab/juicer/wiki/Download) for generating .hic files.
+Please download juicer_tools.jar (https://github.com/aidenlab/juicer/wiki/Download) for creating .hic files.
 
 # Compiling
 
@@ -40,7 +40,7 @@ To analyze Hi-C data, Himapper requires the the index files of the reference gen
   ```
 The above command is to align the paired-end reads in ReadFile1.fa and ReadFile2.fa with index files of ecoli and output the mapping result to alignment.txt.
 
-Then use juicer_tools to produce .hic file
+Then use juicer_tools to create .hic file
 
   ```
  $java -jar juicer_tools.jar pre alignment.txt ecoli.hic ecoli
@@ -61,7 +61,14 @@ Then go to http://www.aidenlab.org/juicebox/ and upload the generated .hic file 
 
 - Output file
 
-    Output is in standard SAM/BAM format. For reads aligned with reverse strand of reference genome, they are converted into obverse strand. More detailed information about SAM/BAM format, please refer to the SAMtools documents.
+    Output is in Medium format (https://github.com/aidenlab/juicer/wiki/Pre)
+    A whitespace separated file that contains, on each line
+    <readname> <str1> <chr1> <pos1> <frag1> <str2> <chr2> <pos2> <frag2> <mapq1> <mapq2>
+    - str = strand (0 for forward, anything else for reverse)
+    - chr = chromosome (must be a chromosome in the genome)
+    - pos = position
+    - frag = restriction site fragment
+    - mapq = mapping quality score
 
 # Parameter setting
 
