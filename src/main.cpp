@@ -15,7 +15,7 @@ bool bDebugMode, gzCompressed, FastQFormat, bMultiHit, bSilent;
 
 void ShowProgramUsage(const char* program)
 {
-	fprintf(stdout, "%s v%s (Hsin-Nan Lin & Wen-Lian Hsu)\n\n", program, VersionStr);
+	fprintf(stdout, "HiMapper v%s (Hsin-Nan Lin & Wen-Lian Hsu)\n\n", VersionStr);
 	fprintf(stdout, "Usage: %s -i Index_Prefix -f <ReadFile_A1 ReadFile_B1 ...> [-f2 <ReadFile_A2 ReadFile_B2 ...>] -o Output\n\n", program);
 	fprintf(stdout, "Options: -t INT        number of threads [4]\n");
 	fprintf(stdout, "         -f            files with #1 mates reads (format:fa, fq, fq.gz)\n");
@@ -59,7 +59,6 @@ int main(int argc, char* argv[])
 
 	enzyme = "";
 	MaxGaps = 5;
-	//binSize = 10000;
 	iThreadNum = 4;
 	bSilent = false;
 	MinSeedLength = 0;
