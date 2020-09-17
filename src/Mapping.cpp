@@ -51,22 +51,6 @@ void RemoveRedundantCandidates(vector<AlignmentCandidate_t>& AlignmentVec)
 	if (vec.size() < AlignmentVec.size()) AlignmentVec.swap(vec);
 }
 
-//bool CheckPairedAlignmentLocation(vector<SeedPair_t>& SeedPairVec1, vector<SeedPair_t>& SeedPairVec2)
-//{
-//	int64_t gPos1, gPos2;
-//	bool bDifferent = true;
-//
-//	if (SeedPairVec1.begin()->gPos < GenomeSize) gPos1 = SeedPairVec1.begin()->gPos;
-//	else gPos1 = TwoGenomeSize - (SeedPairVec1.rbegin()->gPos + SeedPairVec1.rbegin()->Len);
-//
-//	if (SeedPairVec2.begin()->gPos < GenomeSize) gPos2 = SeedPairVec2.begin()->gPos;
-//	else gPos2 = TwoGenomeSize - (SeedPairVec2.rbegin()->gPos + SeedPairVec2.rbegin()->Len);
-//
-//	if ((gPos1 < gPos2 && (gPos2 - gPos1) / 1000 == 0) || (gPos2 < gPos1 && (gPos1 - gPos2) / 1000 == 0) || gPos1 == gPos2) bDifferent = false;
-//
-//	return bDifferent;
-//}
-
 int Cal_mapq(int rlen, int score)
 {
 	float similarity = 1.0 * score / rlen;
@@ -194,33 +178,33 @@ void *ReadMapping(void *arg)
 	inplace_merge(AlnReportVec.begin(), AlnReportVec.end() - ReadNum, AlnReportVec.end(), CompByChr);
 	pthread_mutex_unlock(&OutputLock);
 
+	myAlnReportVec.clear();
+
 	return (void*)(1);
 }
 
 void RemoveDuplications()
 {
 	int i, j, n, count;
-	map<pair<int, int>, bool> DupMap;
+	map<pair<int, int64_t>, bool> DupMap;
 
 	n = (int)AlnReportVec.size();
 	for (i = 0; i < n; i++)
 	{
-		count = 0;
-		for (j = i + 1; j < n; j++)
+		for (count = 0, j = i + 1; j < n; j++)
 		{
-			if (AlnReportVec[i].gPos1 == AlnReportVec[j].gPos1) count++;
-			else
-			{
-				if (count > 100) DupMap[make_pair(AlnReportVec[i].chr1, AlnReportVec[i].gPos1)] = true;
-				i += count;
-				break;
-			}
+			if (AlnReportVec[i].pos1 == AlnReportVec[j].pos1) count++;
+			else break;
 		}
+		if (count > 100) DupMap.insert(make_pair(make_pair(AlnReportVec[i].chr1, AlnReportVec[i].pos1), true));
+		i += count;
 	}
+	fprintf(stderr, "Duplicated coordinates: %d\n", (int)DupMap.size());
+	//for (map<pair<int, int64_t>, bool>::iterator iter = DupMap.begin(); iter != DupMap.end(); iter++) fprintf(stderr, "%s:%lld\n", (char*)ChromosomeVec[iter->first.first].name, (long long)iter->first.second);
 	for (i = 0; i < n; i++)
 	{
-		if (DupMap.find(make_pair(AlnReportVec[i].chr1, AlnReportVec[i].gPos1)) != DupMap.end()) AlnReportVec[i].mapq1 = 0;
-		else if(DupMap.find(make_pair(AlnReportVec[i].chr2, AlnReportVec[i].gPos2)) != DupMap.end()) AlnReportVec[i].mapq2 = 0;
+		if (DupMap.find(make_pair(AlnReportVec[i].chr1, AlnReportVec[i].pos1)) != DupMap.end()) AlnReportVec[i].mapq1 = 0;
+		else if(DupMap.find(make_pair(AlnReportVec[i].chr2, AlnReportVec[i].pos2)) != DupMap.end()) AlnReportVec[i].mapq2 = 0;
 	}
 }
 
@@ -291,12 +275,13 @@ void Mapping()
 		fprintf(stderr, "\t# of total mapped sequences = %lld (sensitivity = %.2f%%)\n", (long long)(iTotalReadNum - iUnMapping), (int)(10000 * (1.0*(iTotalReadNum - iUnMapping) / iTotalReadNum) + 0.5) / 100.0);
 		fprintf(stderr, "\t# of unique paired alignments = %lld (%.2f%%)\n", (long long)iPaired, (int)(10000 * (1.0*iPaired / (iPaired + iMultiHits)) + 0.5) / 100.0);
 		fprintf(stderr, "\t# of ambiguous paired alignments = %lld (%.2f%%)\n", (long long)iMultiHits, (int)(10000 * (1.0*iMultiHits / (iPaired + iMultiHits)) + 0.5) / 100.0);
+
+		fprintf(stderr, "Remove duplicated reads...\n"); RemoveDuplications();
 	}
 	if (AlnReportVec.size() > 0)
 	{
 		fprintf(stderr, "Writing alignment summaries to [%s]\n", OutputFileName);
 		AlnSummaryFileHandler = fopen(OutputFileName, "w");
-		RemoveDuplications();
 		for (vector<AlnReport_t>::iterator iter = AlnReportVec.begin(); iter != AlnReportVec.end(); iter++)
 		{
 			if (iter->mapq1 == 0 || iter->mapq2 == 0) continue;
