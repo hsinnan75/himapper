@@ -124,7 +124,7 @@ extern map<int64_t, int> ChrLocMap;
 extern char *IndexFileName, *OutputFileName;
 extern vector<string> ReadFileNameVec1, ReadFileNameVec2;
 extern bool bDebugMode, gzCompressed, FastQFormat, bSilent;
-extern int MaxInsertSize, iThreadNum, iChromsomeNum, WholeChromosomeNum, MaxGaps, MinSeedLength;
+extern int MaxInsertSize, iThreadNum, iChromsomeNum, WholeChromosomeNum, MaxGaps, MaxDuplicates, MinSeedLength;
 
 // bwt_index.cpp
 extern void RestoreReferenceInfo();

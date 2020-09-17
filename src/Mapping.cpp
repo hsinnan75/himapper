@@ -196,7 +196,7 @@ void RemoveDuplications()
 			if (AlnReportVec[i].pos1 == AlnReportVec[j].pos1) count++;
 			else break;
 		}
-		if (count > 100) DupMap.insert(make_pair(make_pair(AlnReportVec[i].chr1, AlnReportVec[i].pos1), true));
+		if (count > MaxDuplicates) DupMap.insert(make_pair(make_pair(AlnReportVec[i].chr1, AlnReportVec[i].pos1), true));
 		i += count;
 	}
 	fprintf(stderr, "Duplicated coordinates: %d\n", (int)DupMap.size());

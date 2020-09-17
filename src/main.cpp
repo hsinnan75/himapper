@@ -7,10 +7,10 @@ extern "C"
 
 bwt_t *Refbwt;
 bwaidx_t *RefIdx;
-const char* VersionStr = "0.2.0";
+const char* VersionStr = "0.1.0";
 char *IndexFileName, *OutputFileName;
-int iThreadNum, MaxGaps, MinSeedLength;
 vector<string> ReadFileNameVec1, ReadFileNameVec2;
+int iThreadNum, MaxGaps, MaxDuplicates, MinSeedLength;
 bool bDebugMode, gzCompressed, FastQFormat, bMultiHit, bSilent;
 
 void ShowProgramUsage(const char* program)
@@ -23,6 +23,7 @@ void ShowProgramUsage(const char* program)
 	fprintf(stdout, "         -f2           files with #2 mates reads (format:fa, fq, fq.gz)\n");
 	fprintf(stdout, "         -o            read alignment filename in txt format [alignment.txt]\n");
 	fprintf(stdout, "         -m            output multiple alignments\n");
+	fprintf(stdout, "         -dup INT      maximal duplicated reads [3-100, default:10]\n");
 	fprintf(stdout, "         -t INT        number of threads [4]\n");
 	fprintf(stdout, "         -g INT        max gaps (indels) [5]\n");
 	fprintf(stdout, "         -e STR        restriction enzyme (mboi, dpnii, bglii, hindiii)\n");
@@ -68,6 +69,7 @@ int main(int argc, char* argv[])
 	bMultiHit = false;
 	FastQFormat = true;
 	IndexFileName = NULL;
+	MaxDuplicates = 10;
 	OutputFileName = (char*)"alignment.txt";
 
 	if (argc == 1 || strcmp(argv[1], "-h") == 0) ShowProgramUsage(argv[0]);
@@ -114,6 +116,11 @@ int main(int argc, char* argv[])
 			else if (parameter == "-g")
 			{
 				if ((MaxGaps = atoi(argv[++i])) < 0) MaxGaps = 0;
+			}
+			else if (parameter == "-dup" && i + 1 < argc)
+			{
+				if ((MaxDuplicates = atoi(argv[++i])) < 3) MaxDuplicates = 3;
+				else if (MaxDuplicates > 100) MaxDuplicates = 100;
 			}
 			else if (parameter == "-silent") bSilent = true;
 			else if (parameter == "-d" || parameter == "-debug") bDebugMode = true;
