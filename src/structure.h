@@ -104,6 +104,7 @@ typedef struct
 typedef struct
 {
 	int rlen;
+	//int score;
 	char* seq;
 	char* header;
 } ReadItem_t;

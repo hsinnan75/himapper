@@ -1,14 +1,16 @@
 #include "structure.h"
 
-#define MAPQ_COEF 60
+#define MAPQ_COEF 50
 
 typedef struct
 {
 	string header;
+	int64_t gPos1, gPos2;
 	bool strand1, strand2;
 	int chr1, chr2, pos1, pos2, mapq1, mapq2;
 } AlnReport_t;
 
+int thread_count=0;
 int64_t iDistance = 0;
 int TotalPair, CorPair;
 time_t StartProcessTime;
@@ -67,7 +69,8 @@ void RemoveRedundantCandidates(vector<AlignmentCandidate_t>& AlignmentVec)
 
 int Cal_mapq(int rlen, int score)
 {
-	return (int)(MAPQ_COEF * (1 - (1.*(rlen - score) / rlen)));
+	float similarity = 1.0 * score / rlen;
+	return MAPQ_COEF* similarity;
 }
 
 AlnReport_t SwapAlnPair(AlnReport_t AlnReport)
@@ -181,6 +184,10 @@ void *ReadMapping(void *arg)
 	sort(myAlnReportVec.begin(), myAlnReportVec.end(), CompByChr);
 
 	pthread_mutex_lock(&OutputLock);
+
+	if (thread_count == 0) AlnReportVec.reserve((iTotalReadNum / 2));
+	thread_count++;
+	if (!bSilent) fprintf(stderr, "\33[2K\rMerge alignment results (%d / %d)...", thread_count, iThreadNum); fflush(stdout);
 	iPaired += myPairedMapping; iMultiHits += myMultiHits; iUnMapping += myUnMapping;
 	ReadNum = (int)myAlnReportVec.size();
 	copy(myAlnReportVec.begin(), myAlnReportVec.end(), back_inserter(AlnReportVec));
@@ -188,6 +195,33 @@ void *ReadMapping(void *arg)
 	pthread_mutex_unlock(&OutputLock);
 
 	return (void*)(1);
+}
+
+void RemoveDuplications()
+{
+	int i, j, n, count;
+	map<pair<int, int>, bool> DupMap;
+
+	n = (int)AlnReportVec.size();
+	for (i = 0; i < n; i++)
+	{
+		count = 0;
+		for (j = i + 1; j < n; j++)
+		{
+			if (AlnReportVec[i].gPos1 == AlnReportVec[j].gPos1) count++;
+			else
+			{
+				if (count > 100) DupMap[make_pair(AlnReportVec[i].chr1, AlnReportVec[i].gPos1)] = true;
+				i += count;
+				break;
+			}
+		}
+	}
+	for (i = 0; i < n; i++)
+	{
+		if (DupMap.find(make_pair(AlnReportVec[i].chr1, AlnReportVec[i].gPos1)) != DupMap.end()) AlnReportVec[i].mapq1 = 0;
+		else if(DupMap.find(make_pair(AlnReportVec[i].chr2, AlnReportVec[i].gPos2)) != DupMap.end()) AlnReportVec[i].mapq2 = 0;
+	}
 }
 
 void Mapping()
@@ -262,8 +296,12 @@ void Mapping()
 	{
 		fprintf(stderr, "Writing alignment summaries to [%s]\n", OutputFileName);
 		AlnSummaryFileHandler = fopen(OutputFileName, "w");
+		RemoveDuplications();
 		for (vector<AlnReport_t>::iterator iter = AlnReportVec.begin(); iter != AlnReportVec.end(); iter++)
+		{
+			if (iter->mapq1 == 0 || iter->mapq2 == 0) continue;
 			fprintf(AlnSummaryFileHandler, "%s %d %s %d 1 %d %s %d 2 %d %d\n", iter->header.c_str(), (iter->strand1 ? 0 : 16), ChromosomeVec[iter->chr1].name, iter->pos1, (iter->strand2 ? 0 : 16), ChromosomeVec[iter->chr2].name, iter->pos2, iter->mapq1, iter->mapq2);
+		}
 		fclose(AlnSummaryFileHandler);
 	}
 }
