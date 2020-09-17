@@ -7,7 +7,7 @@ extern "C"
 
 bwt_t *Refbwt;
 bwaidx_t *RefIdx;
-const char* VersionStr = "0.1.0";
+const char* VersionStr = "0.1.1";
 char *IndexFileName, *OutputFileName;
 int iThreadNum, MaxGaps, MinSeedLength;
 vector<string> ReadFileNameVec1, ReadFileNameVec2;
