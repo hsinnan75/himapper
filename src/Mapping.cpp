@@ -159,9 +159,6 @@ void *ReadMapping(void *arg)
 			}
 		}
 		FreeReadArrMemory(ReadNum, ReadArr);
-		//pthread_mutex_lock(&DataLock);
-		//pthread_mutex_unlock(&DataLock);
-		//if (iTotalReadNum > 100000) break;
 	}
 	delete[] ReadArr;
 
@@ -169,13 +166,15 @@ void *ReadMapping(void *arg)
 
 	pthread_mutex_lock(&OutputLock);
 
-	if (thread_count == 0) AlnReportVec.reserve((iTotalReadNum / 2));
 	thread_count++;
 	if (!bSilent) fprintf(stderr, "\33[2K\rMerge alignment results (%d / %d)...", thread_count, iThreadNum); fflush(stdout);
 	iPaired += myPairedMapping; iMultiHits += myMultiHits; iUnMapping += myUnMapping;
 	ReadNum = (int)myAlnReportVec.size();
-	copy(myAlnReportVec.begin(), myAlnReportVec.end(), back_inserter(AlnReportVec));
-	inplace_merge(AlnReportVec.begin(), AlnReportVec.end() - ReadNum, AlnReportVec.end(), CompByChr);
+	if (ReadNum > 0)
+	{
+		copy(myAlnReportVec.begin(), myAlnReportVec.end(), back_inserter(AlnReportVec));
+		inplace_merge(AlnReportVec.begin(), AlnReportVec.end() - ReadNum, AlnReportVec.end(), CompByChr);
+	}
 	pthread_mutex_unlock(&OutputLock);
 
 	myAlnReportVec.clear();
