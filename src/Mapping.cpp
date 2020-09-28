@@ -170,11 +170,8 @@ void *ReadMapping(void *arg)
 	if (!bSilent) fprintf(stderr, "\33[2K\rMerge alignment results (%d / %d)...", thread_count, iThreadNum); fflush(stdout);
 	iPaired += myPairedMapping; iMultiHits += myMultiHits; iUnMapping += myUnMapping;
 	ReadNum = (int)myAlnReportVec.size();
-	if (ReadNum > 0)
-	{
-		copy(myAlnReportVec.begin(), myAlnReportVec.end(), back_inserter(AlnReportVec));
-		inplace_merge(AlnReportVec.begin(), AlnReportVec.end() - ReadNum, AlnReportVec.end(), CompByChr);
-	}
+	if (ReadNum > 0) AlnReportVec.insert(AlnReportVec.end(), myAlnReportVec.begin(), myAlnReportVec.end());
+
 	pthread_mutex_unlock(&OutputLock);
 
 	myAlnReportVec.clear();
@@ -279,6 +276,7 @@ void Mapping()
 	}
 	if (AlnReportVec.size() > 0)
 	{
+		sort(AlnReportVec.begin(), AlnReportVec.end(), CompByChr);
 		fprintf(stderr, "Writing alignment summaries to [%s]\n", OutputFileName);
 		AlnSummaryFileHandler = fopen(OutputFileName, "w");
 		for (vector<AlnReport_t>::iterator iter = AlnReportVec.begin(); iter != AlnReportVec.end(); iter++)
