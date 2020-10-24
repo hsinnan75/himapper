@@ -83,6 +83,4 @@ Then go to http://www.aidenlab.org/juicebox/ and upload the generated .hic file 
 
 -o STR read alignment filename in txt format [alignment.txt]
 
--m output multiple alignments [false]
-
   ```

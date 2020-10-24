@@ -22,7 +22,7 @@ void ShowProgramUsage(const char* program)
 	fprintf(stdout, "         -f            files with #1 mates reads (format:fa, fq, fq.gz)\n");
 	fprintf(stdout, "         -f2           files with #2 mates reads (format:fa, fq, fq.gz)\n");
 	fprintf(stdout, "         -o            read alignment filename in txt format [alignment.txt]\n");
-	fprintf(stdout, "         -m            output multiple alignments\n");
+	//fprintf(stdout, "         -m            output multiple alignments\n");
 	fprintf(stdout, "         -dup INT      maximal duplicated reads [3-100, default:10]\n");
 	fprintf(stdout, "         -t INT        number of threads [4]\n");
 	fprintf(stdout, "         -g INT        max gaps (indels) [5]\n");
